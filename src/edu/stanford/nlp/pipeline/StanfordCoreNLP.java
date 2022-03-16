@@ -312,9 +312,19 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     int tokenize = annotators.indexOf(STANFORD_TOKENIZE);
     int clean = annotators.indexOf(STANFORD_CLEAN_XML);
 
-    if (clean >= 0 and tokenize >= 0) {
+    if (clean >= 0 && tokenize >= 0) {
       properties.setProperty(STANFORD_TOKENIZE + "." + STANFORD_CLEAN_XML, "true");
-      // TODO: remove the clean
+      int comma = annotators.indexOf(",", clean);
+      if (comma >= 0 && comma+1 < annotators.length()) {
+        annotators = annotators.substring(0, clean) + annotators.substring(comma+1);
+      } else {
+        comma = annotators.lastIndexOf(",");
+        if (comma < 0) {
+          throw new IllegalArgumentException("Unable to process annotators " + annotators);
+        }
+        annotators = annotators.substring(0, comma);
+      }
+      // TODO: add clean to tokenize
     }
   }
 
