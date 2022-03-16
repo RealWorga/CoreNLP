@@ -255,6 +255,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       this.properties.setProperty("annotators", newAnnotators);
     }
 
+    // if cleanxml is requested and tokenize is here,
+    // make it part of tokenize rather than its own annotator
+    unifyCleanXML(this.properties);
+
     // cdm [2017]: constructAnnotatorPool (PropertiesUtils.getSignature) requires non-null Properties, so after properties setup
     this.pool = annotatorPool != null ? annotatorPool : constructAnnotatorPool(props, getAnnotatorImplementations());
 
@@ -301,6 +305,17 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       System.setProperty(NEWLINE_SPLITTER_PROPERTY, "false");
     }
     this.pipelineSetupTime = tim.report();
+  }
+
+  static void unifyCleanXML(Properties properties) {
+    String annotators = properties.getProperty("annotators", "");
+    int tokenize = annotators.indexOf(STANFORD_TOKENIZE);
+    int clean = annotators.indexOf(STANFORD_CLEAN_XML);
+
+    if (clean >= 0 and tokenize >= 0) {
+      properties.setProperty(STANFORD_TOKENIZE + "." + STANFORD_CLEAN_XML, "true");
+      // TODO: remove the clean
+    }
   }
 
   //
